@@ -1,0 +1,6 @@
+{
+  "meta": {
+    "title": "Goal Ledger",
+    "description": "Folds each human turn into an intent ledger: main line, relation per turn (continue/refine/branch/aside/new root) and consecutive drift. User-facing only; never enters the model context."
+  }
+}

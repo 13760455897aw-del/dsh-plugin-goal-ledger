@@ -1,0 +1,8 @@
+# Generated preview and state dumps — not source.
+dev/*.png
+dev/preview-*.html
+dev/real-view.json
+dev/state-view.json
+dev/mock-view.json
+
+node_modules/

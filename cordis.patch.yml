@@ -1,0 +1,9 @@
+- insert:
+    - id: goal-ledger
+      name: dsh-plugin-goal-ledger
+      config:
+        enabled: true
+        provider: deepseek-account
+        model: deepseek-flash
+        maxTokens: 320
+        timeoutMs: 25000

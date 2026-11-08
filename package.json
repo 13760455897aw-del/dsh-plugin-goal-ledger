@@ -1,0 +1,39 @@
+{
+  "name": "dsh-plugin-goal-ledger",
+  "version": "0.2.0",
+  "private": true,
+  "type": "module",
+  "description": "User-facing intent ledger for a session: main line, turn relations (continue/refine/branch/aside/root) and consecutive drift, shown above the composer. Model-inert.",
+  "main": "index.js",
+  "exports": {
+    ".": "./index.js",
+    "./client": "./lib/client.js",
+    "./locale/*.json": "./locale/*.json",
+    "./icon": "./icon.svg"
+  },
+  "files": [
+    "index.js",
+    "lib/ledger.js",
+    "lib/model-ledger.js",
+    "lib/client.js",
+    "cordis.patch.yml",
+    "locale/*.json",
+    "icon.svg"
+  ],
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
+    "client": {
+      "platform": "web",
+      "inject": [
+        "@deepseek-ai/dsh-client-ui-chat",
+        "@deepseek-ai/dsh-client-ui-conversation",
+        "@deepseek-ai/dsh-client-ui-renderer",
+        "@deepseek-ai/dsh-client-ui-session"
+      ]
+    }
+  }
+}
+
+
