@@ -1,0 +1,3 @@
+# Keep bytes exactly as written: the plugin ships JS/JSON that must not be
+# line-ending rewritten (a BOM/CRLF surprise already cost a debug cycle).
+* -text
