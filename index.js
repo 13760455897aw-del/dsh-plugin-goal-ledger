@@ -141,6 +141,17 @@ export function apply(ctx, config = {}) {
         }
       })
       diag('session/event listener attached')
+
+      // Sessions arrive with their history already loaded; summarise it once so a
+      // resumed conversation has a ledger before its next turn happens.
+      inner.on('session/created', (session) => {
+        try {
+          ledger.onSessionCreated(session)
+        } catch (error) {
+          diag(`backfill fold failed: ${String(error)}`)
+        }
+      })
+      diag('session/created listener attached')
     })
   } catch (error) {
     diag(`inject attach failed: ${String(error)}`)

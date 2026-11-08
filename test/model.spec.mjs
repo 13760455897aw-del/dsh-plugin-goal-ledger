@@ -6,7 +6,7 @@ import assert from 'node:assert/strict'
 import fs from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
-import { ModelLedger, buildPrompt, parseVerdict } from '../lib/model-ledger.js'
+import { ModelLedger, buildDigest, buildPrompt, parseVerdict } from '../lib/model-ledger.js'
 
 let checks = 0
 function check(name, fn) {
@@ -19,7 +19,7 @@ process.env.DSH_HOME = fs.mkdtempSync(path.join(os.tmpdir(), 'goal-ledger-'))
 
 check('parseVerdict accepts a bare JSON line', () => {
   const verdict = parseVerdict('{"rel":"child","parentId":"a1","name":"挪到顶部","progress":"改完了"}')
-  assert.deepEqual(verdict, { rel: 'child', name: '挪到顶部', progress: '改完了', parentId: 'a1', prevDone: true })
+  assert.deepEqual(verdict, { rel: 'child', name: '挪到顶部', progress: '改完了', parentId: 'a1', prevDone: true, prevSummary: '' })
 })
 
 check('parseVerdict tolerates fences and prose', () => {
@@ -130,6 +130,53 @@ check('a failing model call never throws and leaves the ledger untouched', async
   await new Promise((resolve) => setTimeout(resolve, 20))
   assert.equal(ledger.stateOf('s3').tasks.length, 0)
   assert.equal(ledger.stateOf('s3').pending, false)
+})
+
+check('buildDigest keeps prompts and assistant openings, newest when over budget', () => {
+  const log = []
+  for (let i = 1; i <= 50; i += 1) {
+    log.push({ type: 'user/message', data: { source: { kind: 'user' }, content: [{ type: 'text', text: `第 ${i} 个请求` }] } })
+    log.push({ type: 'assistant/message', data: { message: { content: [{ type: 'text', text: `第 ${i} 个回答。` }] } } })
+  }
+  const full = buildDigest(log, 100000)
+  assert.ok(full.includes('用户：第 1 个请求'))
+  const clipped = buildDigest(log, 200)
+  assert.ok(!clipped.includes('第 1 个请求'), 'oldest lines are dropped first')
+  assert.ok(clipped.includes('用户：第 50 个请求'), 'newest lines survive')
+})
+
+check('opening a session with history backfills the whole log once', async () => {
+  const answer = '[{"name":"分析文章数据","progress":"解析 1978 篇","parentIndex":null},{"name":"生成标题","progress":"产出 40 条","parentIndex":0}]'
+  const ledger = new ModelLedger(fakeCtx(answer))
+  const session = {
+    id: 's4',
+    log: [
+      { type: 'user/message', data: { source: { kind: 'user' }, content: [{ type: 'text', text: '帮我看看这些文章' }] } },
+      { type: 'assistant/message', data: { message: { content: [{ type: 'text', text: '先跑一遍数据。' }] } } },
+    ],
+  }
+  ledger.onSessionCreated(session)
+  await new Promise((resolve) => setTimeout(resolve, 20))
+  const state = ledger.stateOf('s4')
+  assert.equal(state.tasks.length, 2)
+  assert.equal(state.currentId, 'b2', 'the newest task is the current one')
+  assert.equal(state.tasks[0].done, true)
+  assert.equal(state.tasks[1].parentId, 'b1', 'parentIndex became a parent id')
+  assert.equal(state.backfilled, true)
+
+  // Second open must not spend another call.
+  const before = state.tasks.length
+  ledger.onSessionCreated(session)
+  await new Promise((resolve) => setTimeout(resolve, 20))
+  assert.equal(ledger.stateOf('s4').tasks.length, before)
+})
+
+check('leaving a task stores the model one-line conclusion', () => {
+  const ledger = new ModelLedger(fakeCtx('{}'))
+  const state = { turn: 5, tasks: [{ id: 'm1', label: '装插件', progress: '装好了', parentId: null, firstTurn: 1, lastTurn: 2, turns: 1, done: false, summary: '' }], currentId: 'm1', draft: null, pending: false }
+  ledger.applyVerdict(state, { rel: 'root', name: '新任务', progress: '开始了', parentId: null, prevDone: true, prevSummary: '插件装好并能显示卡片' }, 5)
+  assert.equal(state.tasks[0].done, true)
+  assert.equal(state.tasks[0].summary, '插件装好并能显示卡片')
 })
 
 console.log(`\n${checks} checks passed`)
