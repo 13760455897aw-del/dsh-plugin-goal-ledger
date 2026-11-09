@@ -1,9 +1,27 @@
+# 目标日志插件的参数。改完重启 DSH 生效。
+#
+# 注意：profile 层的 patch 会整体替换这里声明的 config（不是合并），
+# 所以如果你在 ~/.dsh/profiles/desktop/cordis.patch.yml 里再写一条
+# `- id: goal-ledger`，要把所有键都重写一遍。
 - insert:
     - id: goal-ledger
       name: dsh-plugin-goal-ledger
       config:
+        # 总开关。false 时只保留规则投影，不调模型、不挂路由。
         enabled: true
+        # 走哪个模型路由。provider 是账号来源，model 是具体模型。
         provider: deepseek-account
         model: deepseek-flash
+        # 单次判定的输出上限（token）。判定 JSON 实际只用 40–80。
         maxTokens: 320
+        # 单次调用超时（毫秒）。超时按失败处理，本轮跳过。
         timeoutMs: 25000
+        # 每次提示词里列出的任务条数（账本本身最多保留 60 条）。
+        # 调小能省 token；调大让模型更容易把新一轮挂到更早的任务上。
+        promptTasks: 12
+        # 随每轮发给模型的助手摘录字数（只取开头，取的是收尾总结那句）。
+        excerptChars: 240
+        # 历史回填时喂给模型的对话摘要字数上限（只在首次打开旧会话时用一次）。
+        digestChars: 4000
+        # 模型输出不是 JSON 时的额外重试次数（0–3）。
+        retries: 1

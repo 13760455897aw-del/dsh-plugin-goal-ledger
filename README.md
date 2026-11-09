@@ -46,6 +46,35 @@
 - **不提醒模型**：只提醒人
 - **不写会话日志**：模型结果落在 `~/.dsh/state/goal-ledger/<session>.json`，不碰 session 文件
 
+## 参数（怎么改）
+
+参数在 [cordis.patch.yml](cordis.patch.yml) 的 `config` 里，**改完重启 DSH 生效**。
+
+| 参数 | 默认 | 含义 | 影响 |
+|---|---|---|---|
+| `enabled` | `true` | 总开关 | 关掉只留规则层，不调模型、不挂路由 |
+| `provider` | `deepseek-account` | 模型路由的账号来源 | 换账号/换供应商接口时改 |
+| `model` | `deepseek-flash` | 具体模型 | 换更贵的模型会更好但更慢更贵 |
+| `maxTokens` | `320` | 单次判定输出上限 | 实际只用 40–80，调大没收益 |
+| `timeoutMs` | `25000` | 单次调用超时 | 超时按失败处理，本轮跳过 |
+| `promptTasks` | `12` | 提示词里列几个任务 | 调小省 token；调大更容易挂到旧任务 |
+| `excerptChars` | `240` | 每轮发给模型的助手摘录字数 | 便宜的直接旋钮 |
+| `digestChars` | `4000` | 历史回填的对话摘要上限 | 只在首次打开旧会话时用一次 |
+| `retries` | `1` | 非 JSON 输出的重试次数（0–3） | 偶发跑偏时兜底 |
+
+两种改法：
+
+1. **改插件自带的 [cordis.patch.yml](cordis.patch.yml)**（推荐）：直接改上面的值，重启。所有 profile 都生效。
+2. **改 profile 覆盖**：在 `~/.dsh/profiles/desktop/cordis.patch.yml` 里加一条
+   ```yaml
+   - id: goal-ledger
+     config:
+       enabled: true
+       model: deepseek-chat
+       # ……所有键都要重写，patch 会整体替换 config，不做合并
+   ```
+   注意：profile 层是**整体替换**，漏写的键会回落到代码默认值。
+
 ## 安装
 
 profile 里 link 安装，bundle 选择写进 `dsh.profile.bundles`：
@@ -60,7 +89,10 @@ profile 里 link 安装，bundle 选择写进 `dsh.profile.bundles`：
 
 ```powershell
 node test/ledger.spec.mjs   # 折叠、关系判定、归纳与进度，12 项
-node test/host.spec.mjs     # 宿主入口与投影定义
+node test/model.spec.mjs    # 判定解析、回填、结论、失败不抛，12 项
+node test/config.spec.mjs   # 参数与重试，4 项
+node test/host.spec.mjs     # 宿主入口、两条路由、两个监听
 node test/client.spec.mjs   # 浏览器 bundle 的加载与渲染冒烟
-node dev/preview.mjs        # 用真实组件渲染一张预览页（PREVIEW_MODE=closed 看收起态）
+node test/chip.spec.mjs     # 点开/关闭卡片 + 尺寸探针
+node dev/preview.mjs        # 用真实组件渲染一张预览页
 ```
