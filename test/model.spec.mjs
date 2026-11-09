@@ -179,4 +179,26 @@ check('leaving a task stores the model one-line conclusion', () => {
   assert.equal(state.tasks[0].summary, '插件装好并能显示卡片')
 })
 
+
+check('viewFor carries a revision and waitFor resolves when it moves', async () => {
+  const ledger = new ModelLedger(fakeCtx('{}'))
+  const state = ledger.stateOf('w1')
+  assert.equal(ledger.viewFor('w1').rev, 0)
+
+  const immediate = await Promise.race([
+    ledger.waitFor('w1', -1, 1000).then(() => 'now'),
+    new Promise((resolve) => setTimeout(() => resolve('timeout'), 80)),
+  ])
+  assert.equal(immediate, 'now', 'a stale revision returns at once')
+
+  let resolved = false
+  const pending = ledger.waitFor('w1', 0, 1000).then(() => { resolved = true })
+  await new Promise((resolve) => setTimeout(resolve, 20))
+  assert.equal(resolved, false, 'blocks while nothing changes')
+  ledger.save('w1', state)
+  await pending
+  assert.equal(resolved, true, 'a save wakes the waiter')
+  assert.equal(ledger.viewFor('w1').rev, 1)
+})
+
 console.log(`\n${checks} checks passed`)

@@ -89,15 +89,29 @@ export function apply(ctx, config = {}) {
                 res.end(JSON.stringify({ error: 'session required' }))
                 return
               }
-              const state = ledger.stateOf(sessionId)
-              res.writeHead(200, {
-                'content-type': 'application/json; charset=utf-8',
-                'cache-control': 'no-store'
-              })
-              res.end(JSON.stringify(ledger.viewOf(state)))
+              const since = Number(url.searchParams.get('since') ?? '0') || 0
+              const wait = Number(url.searchParams.get('wait') ?? '0') || 0
+              const respond = () => {
+                try {
+                  res.writeHead(200, {
+                    'content-type': 'application/json; charset=utf-8',
+                    'cache-control': 'no-store'
+                  })
+                  res.end(JSON.stringify(ledger.viewFor(sessionId)))
+                } catch {}
+              }
+              if (wait > 0) {
+                // Long poll: hold the connection until the ledger moves, so a
+                // finished backfill or a fresh turn reaches the card immediately.
+                ledger.waitFor(sessionId, since, Math.min(wait, 15000)).then(respond, respond)
+                return
+              }
+              respond()
             } catch (error) {
-              res.writeHead(500, { 'content-type': 'application/json; charset=utf-8' })
-              res.end(JSON.stringify({ error: String(error) }))
+              try {
+                res.writeHead(500, { 'content-type': 'application/json; charset=utf-8' })
+                res.end(JSON.stringify({ error: String(error) }))
+              } catch {}
             }
           }
         })
