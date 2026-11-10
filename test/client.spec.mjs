@@ -139,6 +139,7 @@ const view = {
 }
 
 const registered = []
+const disposers = []
 const ctx = {
   sessions: {
     binding(sessionId) {
@@ -154,22 +155,31 @@ const ctx = {
       }
     },
   },
+  effect(fn) {
+    disposers.push(fn())
+  },
   slots: {
     inject(name, register) {
       assert.equal(name, 'conversation.input.dock')
       register()
     },
     register(spec, component) {
-      registered.push({ spec, component })
+      const entry = { spec, component }
+      registered.push(entry)
+      return () => {
+        const index = registered.indexOf(entry)
+        if (index >= 0) registered.splice(index, 1)
+      }
     },
   },
 }
 
 mod.apply(ctx)
-// Registration is deferred one task so slot owners declare first.
-await new Promise((resolve) => setTimeout(resolve, 0))
+// Registration is synchronous now: slot order comes from `dsh.client.inject`,
+// and the entry must belong to the plugin's fiber so disabling it removes the UI.
 assert.equal(registered.length, 1)
 assert.equal(registered[0].spec.id, 'goal-ledger')
+assert.equal(disposers.length, 1, 'the slot entry is owned by the plugin fiber')
 
 const props = registered[0].spec.inject('session-1')
 assert.deepEqual(Object.keys(props), ['sessionId'])
@@ -215,6 +225,11 @@ assert.ok(chipElement)
 const chipText = JSON.stringify(calls)
 assert.ok(chipText.includes('目标日志'), 'chip carries the brand')
 assert.ok(chipText.includes('"2"'), 'chip carries the drift count')
+
+// Disabling the plugin must remove its UI: disposing the fiber kills the slot entry.
+assert.equal(registered.length, 1, 'entry present while the plugin is active')
+disposers[0]()
+assert.equal(registered.length, 0, 'disposing the plugin removes the chip')
 
 // A hostile slot service must cost the notepad, never the boot.
 const brokenCtx = {
