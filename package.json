@@ -1,9 +1,8 @@
 {
   "name": "dsh-plugin-goal-ledger",
   "version": "0.2.0",
-  "private": true,
+  "description": "目标日志：把一个长会话折叠成任务树（当前任务红点、完成划线、每件事留结论），规则层零成本兜底、模型层每轮一次小归纳，不进入模型上下文。",
   "type": "module",
-  "description": "User-facing intent ledger for a session: main line, turn relations (continue/refine/branch/aside/root) and consecutive drift, shown above the composer. Model-inert.",
   "main": "index.js",
   "exports": {
     ".": "./index.js",
@@ -18,8 +17,36 @@
     "lib/client.js",
     "cordis.patch.yml",
     "locale/*.json",
-    "icon.svg"
+    "icon.svg",
+    "README.md",
+    "HOST-CONSTRAINTS.md",
+    "DESIGN-PAPER.md",
+    "LICENSE"
   ],
+  "keywords": [
+    "dsh",
+    "dsh-plugin",
+    "goal",
+    "task",
+    "ledger",
+    "session",
+    "agent",
+    "ui"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/13760455897aw-del/dsh-plugin-goal-ledger.git"
+  },
+  "homepage": "https://github.com/13760455897aw-del/dsh-plugin-goal-ledger#readme",
+  "bugs": {
+    "url": "https://github.com/13760455897aw-del/dsh-plugin-goal-ledger/issues"
+  },
+  "author": "hzvezda",
+  "license": "MIT",
+  "engines": {
+    "node": ">=22",
+    "dsh": "^0.2.1-rc.3"
+  },
   "dsh": {
     "bundle": {
       "patch": "./cordis.patch.yml"
@@ -35,5 +62,3 @@
     }
   }
 }
-
-

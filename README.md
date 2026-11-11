@@ -77,22 +77,42 @@
 
 ## 安装
 
-profile 里 link 安装，bundle 选择写进 `dsh.profile.bundles`：
+**从 npm 安装（推荐）**
+
+在 DSH 的「设置 → 插件」里搜索或直接安装组合包：
+
+```
+dsh-plugin-goal-ledger
+```
+
+也可以命令行装进某个 profile：
+
+```powershell
+dsh plugin --profile desktop add dsh-plugin-goal-ledger
+```
+
+新增 bundle 需要重启 DSH 才会组合。
+
+**从源码 link 安装**
 
 ```json
 "dependencies": { "dsh-plugin-goal-ledger": "link:E:/插件灵感一箩筐/packages/goal-ledger" }
 ```
 
-新增 bundle 需要重启 DSH 才会组合。
+并在 `dsh.profile.bundles` 里加上 `dsh-plugin-goal-ledger`。
+
+## 卸载
+
+从 profile 的 `dsh.profile.bundles` 里去掉、删除依赖后重启；或运行仓库里的 `disable.ps1`。
 
 ## 测试
 
 ```powershell
 node test/ledger.spec.mjs   # 折叠、关系判定、归纳与进度，12 项
-node test/model.spec.mjs    # 判定解析、回填、结论、失败不抛，12 项
+node test/model.spec.mjs    # 判定解析、回填、结论、长轮询，13 项
 node test/config.spec.mjs   # 参数与重试，4 项
 node test/host.spec.mjs     # 宿主入口、两条路由、两个监听
-node test/client.spec.mjs   # 浏览器 bundle 的加载与渲染冒烟
+node test/client.spec.mjs   # 浏览器 bundle 的加载、fiber 属主与卸载回收
 node test/chip.spec.mjs     # 点开/关闭卡片 + 尺寸探针
 node dev/preview.mjs        # 用真实组件渲染一张预览页
 ```
