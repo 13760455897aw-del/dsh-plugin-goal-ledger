@@ -77,15 +77,17 @@
 
 ## 安装
 
-**从 npm 安装（推荐）**
+**在插件市场里装（图形界面）**
 
-在 DSH 的「设置 → 插件」里搜索或直接安装组合包：
+DSH 不自带索引源。打开「插件」页 → 实验插件里启用 **Custom plugin indexes** → 切到 **Discover** 标签 → **Add index source**，填入：
 
 ```
-dsh-plugin-goal-ledger
+https://raw.githubusercontent.com/13760455897aw-del/dsh-plugin-goal-ledger/master/plugin-index.json
 ```
 
-也可以命令行装进某个 profile：
+刷新后能看到「目标日志」卡片，点安装即可。
+
+**从 npm 安装**
 
 ```powershell
 dsh plugin --profile desktop add dsh-plugin-goal-ledger
