@@ -43,6 +43,10 @@
   },
   "author": "hzvezda",
   "license": "MIT",
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
   "engines": {
     "node": ">=22",
     "dsh": "^0.2.1-rc.3"
