@@ -1,0 +1,46 @@
+{
+  "format": 1,
+  "title": {
+    "en": "hzvezda plugins",
+    "zh": "hzvezda 插件集"
+  },
+  "description": {
+    "en": "Small plugins for DeepSeek Harness.",
+    "zh": "给 DeepSeek Harness 写的小插件。"
+  },
+  "metadata": {
+    "categories": {
+      "productivity": { "title": { "en": "Productivity", "zh": "效率" } }
+    },
+    "labels": {
+      "goal": { "title": { "en": "Goals", "zh": "目标" } },
+      "ui": { "title": { "en": "Interface", "zh": "界面" } }
+    }
+  },
+  "plugins": [
+    {
+      "name": "dsh-plugin-goal-ledger",
+      "title": { "en": "Goal Ledger", "zh": "目标日志" },
+      "description": {
+        "en": "Folds a long session into a task tree: the current task carries a red dot, finished ones are ticked, and every task keeps a one-line conclusion. Rule layer is free and instant; one small model call per turn names and files the work.",
+        "zh": "把一个长会话折叠成任务树：当前任务带红点、完成的打勾，每件事都留一句结论。规则层零成本即时兜底，模型层每轮一次小归纳负责命名与归类。"
+      },
+      "icon": "icon.svg",
+      "author": "hzvezda",
+      "homepage": "https://github.com/13760455897aw-del/dsh-plugin-goal-ledger#readme",
+      "repository": { "url": "https://github.com/13760455897aw-del/dsh-plugin-goal-ledger" },
+      "metadata": {
+        "category": "productivity",
+        "labels": ["goal", "ui"]
+      },
+      "versions": [
+        {
+          "version": "0.2.0",
+          "publishTimestamp": 1794406733,
+          "source": { "type": "npm" },
+          "engines": { "dsh": "^0.2.1-rc.3" }
+        }
+      ]
+    }
+  ]
+}
